@@ -1,0 +1,4 @@
+/.idea/sonarlint/
+/.idea/workspace.xml
+/build/
+/cmake-build-*/
