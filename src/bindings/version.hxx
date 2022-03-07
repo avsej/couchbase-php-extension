@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef PHP_COUCHBASE_H_
-#define PHP_COUCHBASE_H_
+#pragma once
 
-#include <zend_modules.h>
+#include <php.h>
 
-#define PHP_COUCHBASE_VERSION "4.0.0"
-#define PHP_COUCHBASE_EXTENSION_NAME "couchbase"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern zend_module_entry couchbase_module_entry;
-#ifdef __cplusplus
-};
-#endif
-
-#endif
+namespace couchbase::php
+{
+zval
+core_version();
+}
