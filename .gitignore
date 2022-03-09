@@ -20,7 +20,7 @@
 /aclocal.m4
 /autom4te.cache
 /build/
-/cmake-build-debug/
+/cmake-build*/
 /config.guess
 /config.h
 /config.h.in

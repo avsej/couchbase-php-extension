@@ -18,6 +18,8 @@
 
 #include <couchbase/meta/version.hxx>
 
+namespace couchbase::php
+{
 zval
 core_version()
 {
@@ -36,3 +38,4 @@ core_version()
 
     return version;
 }
+} // namespace couchbase::php

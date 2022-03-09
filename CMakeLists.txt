@@ -6,16 +6,8 @@ set(CMAKE_C_STANDARD 99)
 
 add_subdirectory(deps/couchbase-cxx-client)
 
-get_filename_component(PHP_SRC_PATH "~/code/php/php-src" ABSOLUTE)
-
-include_directories(
-  "${PHP_SRC_PATH}"
-  "${PHP_SRC_PATH}/main"
-  "${PHP_SRC_PATH}/Zend"
-  "${PHP_SRC_PATH}/TSRM"
-  "${PHP_SRC_PATH}/ext"
-  "${PHP_SRC_PATH}/sapi"
-  "${PROJECT_SOURCE_DIR}")
+string(REGEX REPLACE "[\r\n]|-I" " " PHP_INCLUDE_DIRS "${COUCHBASE_PHP_INCLUDES}")
+separate_arguments(PHP_INCLUDE_DIRS)
 
 if(NOT EXT_GIT_REVISION)
   find_program(GIT git)
@@ -31,17 +23,9 @@ if(NOT EXT_GIT_REVISION)
 endif()
 configure_file(${PROJECT_SOURCE_DIR}/cmake/ext_build_version.hxx.in
                ${PROJECT_BINARY_DIR}/generated/ext_build_version.hxx @ONLY)
-file(
-  GENERATE
-  OUTPUT ${PROJECT_BINARY_DIR}/generated/ext_build_info.hxx
-  CONTENT
-    "
-#pragma once
-constexpr auto RUBY_LIBRARY = \"${RUBY_LIBRARY}\";
-constexpr auto RUBY_INCLUDE_DIR = \"${RUBY_INCLUDE_DIR}\";
-")
 
 file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/bindings/*.cxx)
-add_library(couchbase STATIC ${SOURCE_FILES})
-target_include_directories(couchbase PRIVATE ${PROJECT_BINARY_DIR}/generated)
-target_link_libraries(couchbase PRIVATE project_options project_warnings couchbase_cxx_client)
+add_library(couchbase_php_core SHARED ${SOURCE_FILES})
+target_include_directories(couchbase_php_core PRIVATE ${PROJECT_BINARY_DIR}/generated)
+target_include_directories(couchbase_php_core PRIVATE BEFORE SYSTEM ${PHP_INCLUDE_DIRS})
+target_link_libraries(couchbase_php_core PRIVATE project_options project_warnings couchbase_cxx_client)

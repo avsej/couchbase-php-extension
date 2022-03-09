@@ -1,4 +1,5 @@
-.PHONY: build-core
+$(COUCHBASE_CMAKE_BUILD_DIRECTORY)/libcouchbase_php_core.${SHLIB_SUFFIX_NAME}: 
+	$(CMAKE) --build $(COUCHBASE_CMAKE_BUILD_DIRECTORY)
 
-build-core:
-	@echo "CMAKE: $(CMAKE)"
+.PHONY: build-core
+build-core: $(COUCHBASE_CMAKE_BUILD_DIRECTORY)/libcouchbase.${SHLIB_SUFFIX_NAME}

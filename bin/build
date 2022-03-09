@@ -40,12 +40,11 @@ run("#{CB_PHP_PREFIX}/bin/php --ini")
 Dir.chdir(PROJECT_ROOT) do
   run("#{CB_PHP_PREFIX}/bin/phpize")
   run("./configure --with-php-config=#{CB_PHP_PREFIX}/bin/php-config")
-  exit
   run("make clean")
   run("make -j8")
 end
 
-COUCHBASE_EXT="#{PROJECT_ROOT}/modules/couchbase.so"
+COUCHBASE_EXT="#{PROJECT_ROOT}/modules/couchbase.#{RbConfig::CONFIG["DLEXT"]}"
 
 run("#{CB_PHP_PREFIX}/bin/php -d extension=#{COUCHBASE_EXT} -m | grep couchbase")
 run("#{CB_PHP_PREFIX}/bin/php -d extension=#{COUCHBASE_EXT} -i | grep couchbase")
