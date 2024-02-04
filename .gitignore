@@ -49,6 +49,8 @@
 /phpunit.result.cache
 /run-tests.php
 /src/.idea/
+/src/cmake/cache
+/src/cmake/extra.cmake
 /test.cache
 /vendor/
 cmake-build*/

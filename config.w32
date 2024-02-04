@@ -21,7 +21,8 @@ if (PHP_COUCHBASE != "no") {
         .replace(new RegExp('"', 'g'), '\\"')
         .replace(new RegExp('\\s+', 'g'), ' ')
         .replace(new RegExp('/D ', 'g'), '/D')
-        .replace(new RegExp('/I ', 'g'), '/I');
+        .replace(new RegExp('/I ', 'g'), '/I')
+        .replace(new RegExp('"', 'g'), "'");
 
     STDOUT.WriteLine('MODE_PHPIZE=' + MODE_PHPIZE);
     STDOUT.WriteLine('PHP_SRC_DIR="' + PHP_SRC_DIR + '"');
@@ -31,10 +32,10 @@ if (PHP_COUCHBASE != "no") {
     }
     var php_src_prefix = MODE_PHPIZE ? (PHP_DIR + "\\include") : PHP_SRC_DIR;
     var COUCHBASE_PHP_INCLUDES =
-        php_src_prefix + " " +
-        php_src_prefix + "\\main " +
-        php_src_prefix + "\\Zend " +
-        php_src_prefix + "\\TSRM " +
+        php_src_prefix + ";" +
+        php_src_prefix + "\\main;" +
+        php_src_prefix + "\\Zend;" +
+        php_src_prefix + "\\TSRM;" +
         php_src_prefix + "\\ext";
     var COUCHBASE_PHP_LIB =
         (MODE_PHPIZE ?  PHP_DIR + "\\lib" : get_define("BUILD_DIR")) +
@@ -73,6 +74,7 @@ if (PHP_COUCHBASE != "no") {
         ' -D COUCHBASE_PHP_INCLUDES="' + COUCHBASE_PHP_INCLUDES + '"' +
         ' -D COUCHBASE_PHP_LIB="' + COUCHBASE_PHP_LIB + '"' +
         ' -D COUCHBASE_PHP_LIBDIR="' + get_define("BUILD_DIR") + '"' +
+        ' -D COUCHBASE_CXX_CLIENT_STATIC_BORINGSSL=ON ' +
         ' -D COUCHBASE_CXX_CLIENT_BUILD_EXAMPLES=OFF ' +
         ' -D COUCHBASE_CXX_CLIENT_BUILD_TOOLS=OFF ' +
         ' -D COUCHBASE_CXX_CLIENT_BUILD_DOCS=OFF ' +
