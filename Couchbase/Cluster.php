@@ -63,6 +63,7 @@ class Cluster implements ClusterInterface
         $this->connectionHash = hash("sha256", sprintf("--%s--%s--%s--", $connectionString, $options->authenticatorHash(), COUCHBASE_EXTENSION_NAMESPACE));
         $function = COUCHBASE_EXTENSION_NAMESPACE . '\\createConnection';
         $this->core = $function($this->connectionHash, $connectionString, $options->export());
+        var_dump($this->core);
         $this->options = $options;
     }
 

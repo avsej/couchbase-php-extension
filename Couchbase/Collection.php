@@ -43,6 +43,7 @@ class Collection implements CollectionInterface
      * @var resource
      */
     private $core;
+    private $core2;
 
     /**
      * @param string $name
@@ -59,7 +60,11 @@ class Collection implements CollectionInterface
         $this->name = $name;
         $this->scopeName = $scopeName;
         $this->bucketName = $bucketName;
+        var_dump($core);
         $this->core = $core;
+        var_dump($this->core);
+        $this->core2 = $core;
+        var_dump($this->core2);
     }
 
 
