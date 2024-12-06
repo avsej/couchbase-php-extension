@@ -26,6 +26,9 @@
 
 #include <fmt/chrono.h>
 
+#undef CB_LOG_DEBUG
+#define CB_LOG_DEBUG(...) fmt::println(stderr, __VA_ARGS__);
+
 namespace couchbase::php
 {
 
@@ -48,6 +51,34 @@ get_persistent_connection_destructor_id() -> int
   return persistent_connection_destructor_id_;
 }
 
+auto
+print_refcounters(zval* zv) -> int
+{
+  zend_resource* res = Z_RES_P(zv);
+
+  auto now = std::chrono::system_clock::now();
+
+  if (res->type == persistent_connection_destructor_id_) {
+    const auto* handle = static_cast<connection_handle*>(res->ptr);
+    const std::string connection_string = handle->connection_string();
+    const std::string connection_hash = handle->connection_hash();
+    const auto expires_at = handle->expires_at();
+    CB_LOG_DEBUG(
+      "persistent connection: handle={}, connection_hash={}, connection_string=\"{}\", "
+      "expires_at=\"{}\" ({}), destructor_id={}, refcount={}, num_persistent={}, expired={}",
+      static_cast<const void*>(handle),
+      connection_hash,
+      connection_string,
+      expires_at,
+      (expires_at - now),
+      res->type,
+      GC_REFCOUNT(res),
+      COUCHBASE_G(num_persistent),
+      handle->is_expired(now));
+  }
+  return ZEND_HASH_APPLY_KEEP;
+}
+
 COUCHBASE_API
 auto
 check_persistent_connection(zval* zv) -> int
@@ -59,6 +90,11 @@ check_persistent_connection(zval* zv) -> int
   if (res->type == persistent_connection_destructor_id_) {
     const auto* handle = static_cast<connection_handle*>(res->ptr);
     if (handle->is_expired(now)) {
+            if (GC_REFCOUNT(res) == 0) {
+                /* connection has timed out */
+                return ZEND_HASH_APPLY_REMOVE;
+            }
+
       const std::string connection_string = handle->connection_string();
       const std::string connection_hash = handle->connection_hash();
       const auto expires_at = handle->expires_at();
@@ -73,9 +109,6 @@ check_persistent_connection(zval* zv) -> int
         res->type,
         GC_REFCOUNT(res),
         COUCHBASE_G(num_persistent));
-
-      /* connection has timed out */
-      return ZEND_HASH_APPLY_REMOVE;
     }
   }
   return ZEND_HASH_APPLY_KEEP;
@@ -134,6 +167,9 @@ create_persistent_connection(zend_string* connection_hash,
       "cleanup idle connections. max_persistent({}) != -1, num_persistent({}) >= max_persistent",
       COUCHBASE_G(max_persistent),
       COUCHBASE_G(num_persistent));
+        fprintf(stderr, "-- BEGIN -----\n");
+    zend_hash_apply(&EG(persistent_list), print_refcounters);
+        fprintf(stderr, "-- END -------\n");
     zend_hash_apply(&EG(persistent_list), check_persistent_connection);
   } else {
     CB_LOG_DEBUG("don't cleanup idle connections. couchbase.persistent_timeout={}, "

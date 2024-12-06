@@ -262,14 +262,37 @@ PHP_FUNCTION(createConnection)
   RETURN_RES(resource);
 }
 
+auto
+print_refcounters(zval* zv) -> int
+{
+  zend_resource* res = Z_RES_P(zv);
+
+  auto now = std::chrono::system_clock::now();
+
+  if (res->type == couchbase::php::get_persistent_connection_destructor_id()) {
+        fprintf(stderr,
+                "-- persistent connection ptr=%p, destructor_id=%d, refcount=%d\n",
+                res->ptr,
+                res->type,
+                GC_REFCOUNT(res));
+  }
+  return ZEND_HASH_APPLY_KEEP;
+}
+
 inline auto
 fetch_couchbase_connection_from_resource(zval* resource) -> couchbase::php::connection_handle*
 {
   zend_resource* res = Z_RES_P(resource);
   fprintf(stderr,
-          "using persistent connection destructor_id=%d, refcount=%d\n",
+          "using persistent connection ptr=%p, destructor_id=%d, refcount=%d\n",
+          res->ptr,
           res->type,
           GC_REFCOUNT(res));
+
+        fprintf(stderr, "-- BEGIN -----\n");
+    zend_hash_apply(&EG(persistent_list), print_refcounters);
+        fprintf(stderr, "-- END -------\n");
+
   return static_cast<couchbase::php::connection_handle*>(
     zend_fetch_resource(res,
                         "couchbase_persistent_connection",
